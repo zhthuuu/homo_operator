@@ -1,0 +1,4 @@
+This code is to generate mesh file for the two-dimensional microscale RVE written in C++
+The RVE is composed with circle fiber inclusions and soft matrix. 
+The position of circle inclusions are randomly distributed, which is the major uncertainty in multiscale problem coming from.
+To run the code, use script "./run input"
