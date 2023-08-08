@@ -1,0 +1,27 @@
+function [p, t] = generate_mesh(s)
+    % generate nodes and connectivity 
+    % record node coordinates [x, y]
+    
+    nnode = nelems_w * nelems_h;
+    p = zeros(nnode, 2);
+    lw = width/(nelems_w+1); lh = height/(nelems_h+1);
+    for i = 1:(nelems_h+1)*(nelems_w+1)
+        column = rem(i, nelems_w+1);
+        if column == 0
+            column = nelems_w + 1;
+        end
+        row = (i-column)/(nelems_w+1)+1;
+        coord_x = lw*(column-1);
+        coord_y = lh*(row-1);
+        p(i, :) = [coord_x, coord_y];
+    end
+
+    % record the node No. given an element No.
+    numNode = (nelems_w+1) * (nelems_h+1);
+    node_matrix = reshape(1:numNode, nelems_w+1, nelems_h+1)';
+    t1 = reshape(node_matrix(1:end-1, 1:end-1)', [], 1);
+    t2 = reshape(node_matrix(1:end-1, 2:end)', [], 1);
+    t3 = reshape(node_matrix(2:end, 2:end)', [], 1);
+    t4 = reshape(node_matrix(2:end, 1:end-1)', [], 1);
+    t = [t1, t2, t3, t4];
+end

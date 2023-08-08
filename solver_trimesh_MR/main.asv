@@ -1,0 +1,51 @@
+clc; clear;
+load data/trimesh_N1000.mat
+
+%% PROPERTIES
+% Matrix properties
+alpham = 0.5*328.1250;   % Alpha in MPa
+betam = 10;              % Beta in MPa
+km = 1750;               % Bulk modulus
+um = 2*alpham;           % Shear modulus
+lambdam = km - (2/3)*um; % Lambda
+sm = lambdam - 4*betam;  % s1 = Lambda - 4*Beta
+% Inclusion properties
+alphaf = 100*alpham;
+betaf = 10*betam;
+kf = 100*km;
+uf = 2*alphaf; 
+lambdaf = kf - (2/3)*uf;
+sf = lambdaf - 4*betaf;
+%
+PROP_CPP = [alpham, betam, sm;
+            alphaf, betaf, sf];
+
+%% single case
+% Cauchy Green matrix
+% BIAXIAL TENSION
+% C1 = linspace(0.9, 1.5, 10);
+% C2 = linspace(0.9, 1.5, 10);
+% [MATC1, MATC2] = meshgrid(C1,C2);
+% C1 = MATC1(:);
+% C2 = MATC2(:);
+% C3 = zeros(length(C1),1);
+% UNIAXIAL TENSION
+% C1 = linspace(1, 1.5, 10);
+C1 = 1.5;
+C2 = ones(length(C1),1);
+C3 = zeros(length(C1),1);
+mesh = trimesh(1);
+W = run_solver(PROP_CPP, mesh, C1, C2, C3);
+
+%% multiple cases
+N = 1000;
+Weff = zeros(N, 1);
+for i = 1:N
+    if rem(i, 100) == 0
+        disp([num2str(i), '/1000 finished']);
+    end
+    Weff(i) = run_solver(PROP_CPP, trimesh(i), C1, C2, C3);
+end
+
+
+
