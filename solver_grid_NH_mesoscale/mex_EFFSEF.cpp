@@ -27,15 +27,15 @@ void mexFunction(int          nlhs,
                           "MEXCPP requires 1 output argument.");
     }
     
-    double *DISPTD, *PROP;
-    double A, We, J, alpha1, beta1, s1, s2, WEFF, Ae, s;
-    int32_T *PHASES, *DOFe;
-    int NE, phaseElem;
+    double *DISPTD, *BULK, *SHEAR;
+    double A, We, J, WEFF, Ae, s, lambda, mu;
+    int32_T *DOFe;
+    int NE;
     
     DISPTD = (double *) mxGetPr(prhs[0]);
     NE = (int) mxGetScalar(prhs[1]);
-    PROP = (double *) mxGetPr(prhs[2]);
-    PHASES = (int32_T *) mxGetData(prhs[3]);
+    BULK = (double *) mxGetPr(prhs[2]);
+    SHEAR = (double *) mxGetPr(prhs[3]);
     s = (double) mxGetScalar(prhs[4]);
     Ae = (double) mxGetScalar(prhs[5]);
     DOFe = (int32_T *) mxGetData(prhs[6]);
@@ -54,12 +54,9 @@ void mexFunction(int          nlhs,
     for (unsigned int e=0;e<NE;e++)
         {
         
-        phaseElem = PHASES[e];
-        
-        alpha1 = PROP[phaseElem-1];
-        beta1 = PROP[phaseElem+1];
-        s1 = PROP[phaseElem+3];
-        s2 = 2*(alpha1+2*beta1);
+                
+        lambda = BULK[e];
+        mu = SHEAR[e];
         
         for (unsigned int j=0;j<8;j++){
             uE[j]=DISPTD[t2D(DOFe,j,e,8)-1];
@@ -72,15 +69,14 @@ void mexFunction(int          nlhs,
               1, -1,
               1,  1,
              -1,  1;
+
         D = D*s/2;
     
         F = U*D + I;
         J = F.determinant();
         C = F.transpose()*F;
         
-        We = alpha1*(C.trace() - 2) + 
-                beta1*(C(0,0)+C(1,1)+C(0,0)*C(1,1)-C(0,1)*C(1,0)-3) + 
-                s1*(J-1)*(J-1)/double(2) - s2*log(J);
+        We = (mu/(double(2)))*(C.trace() - 2) + (lambda/(double(2)))*(J-1.0)*(J-1.0) - mu*log(J); 
         
         A += Ae;
         WEFF += Ae*We;

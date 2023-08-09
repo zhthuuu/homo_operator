@@ -1,4 +1,4 @@
-function [WEFF, DISPTD_FINAL] = NL2DSOLVER(FIXEDNODES, p, PROP, NE, GDOF, ND, g, PHASES, s, Ae, DOFe, ISPARSE, JSPARSE, KSPARSE)
+function [WEFF, DISPTD_FINAL] = NL2DSOLVER(FIXEDNODES, p, BULK, SHEAR, NE, GDOF, ND, g, s, Ae, DOFe, ISPARSE, JSPARSE, KSPARSE)
                           
 %% INITIALIZATION DATA 
 
@@ -77,7 +77,7 @@ while (FLAG10 == 1)
             ITER = ITER + 1;
             if(ITER>ITRA), error('Iteration limit exceeds'); end  
 
-            [X, Y] = mex_HYPER2D(PROP,NE,PHASES,s, Ae,GDOF,DOFe,DISPTD);
+            [X, Y] = mex_HYPER2D(BULK, SHEAR, NE, s, Ae, GDOF, DOFe, DISPTD);
             GKF = sparse(ISPARSE, JSPARSE, X, GDOF, GDOF);
             FORCE = sparse(KSPARSE, ones(8*NE, 1), Y, GDOF, 1);
             
@@ -132,7 +132,7 @@ while (FLAG10 == 1)
     end 
 end 
 
-WEFF = mex_EFFSEF(DISPTD, NE, PROP, PHASES, s, Ae, DOFe);
+WEFF = mex_EFFSEF(DISPTD, NE, BULK, SHEAR, s, Ae, DOFe);
 DISPTD_FINAL = DISPTD;
 
 end

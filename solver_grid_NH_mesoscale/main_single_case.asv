@@ -1,33 +1,25 @@
-%% EXAMPLE FOR THE MULTISCALE CLASS
+%% EXAMPLE FOR THE MULTISCALE CLASS: solve Neo-Hookean material with grid mesh
 %% HYPERELASTIC MICROSTRUCTURE WITH MR MATERIALS
 clc
 clear
 close all
-x1 = 10; x2 = 2; 
-% x1=100; x2=10;
-%% PROPERTIES
-% Matrix properties
-alpham = 0.5*328.1250;   % Alpha in MPa
-betam = 10;              % Beta in MPa
-km = 1750;               % Bulk modulus
-um = 2*alpham;           % Shear modulus
-lambdam = km - (2/3)*um; % Lambda
-sm = lambdam - 4*betam;  % s1 = Lambda - 4*Beta
-% Inclusion properties
-alphaf = x1*alpham;
-betaf = x2*betam;
-kf = x1*km;
-uf = 2*alphaf; 
-lambdaf = kf - (2/3)*uf;
-sf = lambdaf - 4*betaf;
-%
-PROP_CPP = [alpham, betam, sm;
-            alphaf, betaf, sf];
 
 %% Load and plot the mesh
-load ../data/phase_N1000_s64.mat
-s = 64;
-sample = 100;
+load ../data/mesoscale_grid/input_s128.mat
+f = figure;
+subplot(1,2,1)
+title('bulk moduli');
+patch('Faces',t,'Vertices',p,'FaceVertexCData',eta_bulk,'FaceColor','flat','EdgeColor', 'white');
+colorbar;
+subplot(1,2,2)
+title('shear moduli');
+patch('Faces',t,'Vertices',p,'FaceVertexCData',eta_shear,'FaceColor','flat','EdgeColor', 'none');
+colorbar;
+f.Position = [200 200 1100 400];
+
+%% preprocessing
+s = 128;
+
 PHASES = reshape(phase(sample, :, :), s, s);
 PHASES = reshape(flip(PHASES)', [],1)+1;
 NE = s * s; ND = s*4; % number of fixed nodes

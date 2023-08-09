@@ -15,9 +15,9 @@
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     
-    double *PROP, *DISPTD;
-    double s, Ae;
-    int32_T *DOFe, *PHASES;
+    double *BULK, *SHEAR, *DISPTD;
+    double s, Ae, lambda, mu;
+    int32_T *DOFe;
     int NE, GDOF;
     
     /* Check for proper number of arguments */
@@ -30,12 +30,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     }
     /* ------------------------------------- */
     
-    PROP = (double *) mxGetPr(prhs[0]);
-    NE = (int) mxGetScalar(prhs[1]);
-    PHASES = (int32_T *) mxGetData(prhs[2]);
+    BULK = (double *) mxGetPr(prhs[0]);
+    SHEAR = (double *) mxGetPr(prhs[1]);
+    NE = (int) mxGetScalar(prhs[2]);
+//     PHASES = (int32_T *) mxGetData(prhs[3]);
 //     sb = (double *) mxGetPr(prhs[3]);
 //     sc = (double *) mxGetPr(prhs[4]);
-//     Ae = (double *) mxGetPr(prhs[3]);
     s = (double) mxGetScalar(prhs[3]);
     Ae = (double) mxGetScalar(prhs[4]);
     GDOF = (int) mxGetScalar(prhs[5]);
@@ -43,8 +43,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     DISPTD = (double *) mxGetPr(prhs[7]);
     
     double *X, *Y;
-    double J, C1, C2, Aire, alpha1, beta1, s1, s2;
-    int phaseElem;
+    double J, C1, C2, Aire;
     Eigen::Matrix<double,2,2> I, F, C, L, S;
     Eigen::Matrix<double,2,4> U;
     Eigen::Matrix<double,4,2> D;
@@ -69,12 +68,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     for (int e=0;e<NE;e++)
     {
         Aire = Ae;
-        phaseElem = PHASES[e];
         
-        alpha1 = PROP[phaseElem-1];
-        beta1 = PROP[phaseElem+1];
-        s1 = PROP[phaseElem+3];
-        s2 = 2*(alpha1+2*beta1);
+        lambda = BULK[e];
+        mu = SHEAR[e];
         
         for (unsigned int j=0;j<8;j++)
         {
@@ -88,6 +84,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
               1, -1,
               1,  1,
              -1,  1;
+
         D = D*s/2;
         F = U*D + I;
         J = F.determinant();
@@ -103,15 +100,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
               0.0, D(0,0), 0.0, D(1,0), 0.0, D(2,0), 0.0, D(3,0),
               0.0, D(0,1), 0.0, D(1,1), 0.0, D(2,1), 0.0, D(3,1);
         
-        C1 = s1*J*(2*J - 1); 
-        C2 = 2*s1*J*(J-1)-2*s2;
+        C1 = lambda*J*(2.0*J-1.0);
+        C2 = 2.0*lambda*J*(J-1.0)-2.0*mu;
+
+        K << L(0,0)*L(0,0)*(C1-C2), -C2*L(0,1)*L(0,1) + C1*L(0,0)*L(1,1), L(0,0)*L(0,1)*(C1-C2),
+             -C2*L(1,0)*L(1,0) + C1*L(0,0)*L(1,1), L(1,1)*L(1,1)*(C1-C2), L(1,1)*(C1*L(0,1)-C2*L(1,0)),
+             L(0,0)*(C1*L(0,1)-C2*L(1,0)), L(0,1)*L(1,1)*(C1-C2), C1*L(0,1)*L(0,1) - (C2*(L(0,0)*L(1,1) + L(0,1)*L(1,0)))/(double(2));
         
-        K << L(0,0)*L(0,0)*(C1-C2), - C2*L(0,1)*L(0,1) + 4*beta1 + C1*L(0,0)*L(1,1), L(0,0)*L(0,1)*(C1-C2),
-             -C2*L(1,0)*L(1,0) + 4*beta1 + C1*L(0,0)*L(1,1), L(1,1)*L(1,1)*(C1-C2), L(1,1)*(C1*L(0,1) - C2*L(1,0)),
-            L(0,0)*(C1*L(0,1)-C2*L(1,0)), L(0,1)*L(1,1)*(C1-C2), C1*L(0,1)*L(0,1) - 4*beta1 - (C2*(L(0,0)*L(1,1) + L(0,1)*L(1,0)))/double(2);
-        
-        S = 2*(alpha1 + beta1*(C.trace()+1))*I 
-                - 2*beta1*C + (s1*J*(J-1)-s2)*L;
+        S = mu*I + (lambda*J*(J-1.0)-mu)*L;
         
         G << S(0,0),S(0,1),0.0,0.0,
              S(1,0),S(1,1),0.0,0.0,

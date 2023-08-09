@@ -2,10 +2,10 @@
 % @Hao Zhang, 8/5/2023
 
 clc; clear;
-addpath ./FEM_toolbox/model
-addpath ./FEM_toolbox/2d
+addpath ../FEM_toolbox/model/
+addpath ../FEM_toolbox/2d_trimesh/
 seed = RandStream('mt19937ar', 'Seed', 1); RandStream.setGlobalStream(seed); %set seed
-file = 'FEM_toolbox/geometry/square/mesh_composite.mat'; % input brain tissue boundary mesh
+file = '../FEM_toolbox/geometry/square/mesh_composite.mat'; % input brain tissue boundary mesh
 dir = 'data/'; 
 if ~exist(dir, 'dir')
     mkdir(dir); % generated mesh folder
@@ -63,9 +63,9 @@ patch('Faces',t,'Vertices',p,'FaceVertexCData',eta_beta_shear(:,id),'FaceColor',
 colorbar;
 f.Position = [200 200 900 400];
 
-%% save single data
-bulk = eta_beta_bulk(:,1);
-shear = eta_beta_shear(:,1);
-bulk = mean(bulk(t), 2);
-shear = mean(shear(t), 2);
-save data/mesh p t FIXEDNODES bulk shear
+% %% save single data
+% bulk = eta_beta_bulk(:,1);
+% shear = eta_beta_shear(:,1);
+% bulk = mean(bulk(t), 2);
+% shear = mean(shear(t), 2);
+% save data/mesh p t FIXEDNODES bulk shear
