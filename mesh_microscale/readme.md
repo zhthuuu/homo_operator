@@ -15,3 +15,5 @@ Note: two parameters in the parameters_2d.txt file are important to influence th
 - #max_iterations 200  // cannot be to large, if so the final packing will be the same as in regular lines
 - to generate excutive file: change parameter DIM in src_tj/makefile, then run 'cd src_tj, make'
 
+3. run matlab_postprocessing to generate trimesh and grid mesh
+
