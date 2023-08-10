@@ -1,0 +1,32 @@
+data:
+  name: 'HyperElastic'
+  datapath: 'data/hyper_elastic/train_N600_s64.mat'
+  total_num: 1000
+  offset: 0
+  n_sample: 600
+  nx: 64
+  sub: 1
+
+model:
+  layers: [64, 64, 64, 64]
+  modes1: [20, 20, 20]
+  modes2: [20, 20, 20]
+  fc_dim: 128
+  activation: gelu
+
+train:
+  batchsize: 20
+  epochs: 200
+  milestones: [50,100, 150, 200]
+  base_lr: 0.001
+  scheduler_gamma: 0.5
+  f_loss: 1.0
+  xy_loss: 5.0
+  dbc_loss: 0
+  save_dir: 'hyper_elastic'
+  # ckpt: 'hyper-pretrain-pino-ep200.pt'
+  save_name: 'pretrain-pino-ep200.pt'
+
+others:
+  project: 'PINO-Hyper-pretrain'
+  group: 'gelu-pino'

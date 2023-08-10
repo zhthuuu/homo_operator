@@ -45,7 +45,7 @@ colorbar;
 
 %% generate dataset
 rng(41);
-N = 1;
+N = 100;
 g1 = normrnd(mu,sigma,numNodes,N); 
 eta1 = transP * (R \ g1); 
 g2 = normrnd(mu,sigma,numNodes,N); 
@@ -53,6 +53,6 @@ eta2 = transP * (R \ g2);
 clear g1 g2
 eta_bulk = convert_beta_bulk(bulk_moduli_height, delta, eta1)+bulk_moduli;
 eta_shear = convert_beta_shear(shear_moduli_height, delta, eta1, eta2, rho)+shear_moduli;
-save ../../data/mesoscale_grid/input_s128.mat eta_bulk eta_shear p t FIXEDNODES
+save ../../data/mesoscale_grid/input_N100_s128.mat eta_bulk eta_shear p t FIXEDNODES
 
 

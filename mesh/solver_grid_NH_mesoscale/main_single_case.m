@@ -85,22 +85,31 @@ patch('Faces',t,'Vertices',p,'FaceVertexCData',UY,'FaceColor','flat','EdgeColor'
 colorbar;
 f.Position = [200 200 1100 400];
 
-%%% plot
-% UX = DISP(1:2:end); UY = DISP(2:2:end);
-% UX = flip(reshape(UX, s+1, s+1)');
-% UY = flip(reshape(UY, s+1, s+1)');
-% a = flip(reshape(PHASES, s, s)');
-% h = figure();
-% subplot(1,3,1);
-% [X, Y] = meshgrid(linspace(0,1,s), linspace(0,1,s));
-% mesh(X, Y, a, 'FaceColor','flat'); view(2);
-% subplot(1,3,2);
-% [X, Y] = meshgrid(linspace(0,1,s+1), linspace(0,1,s+1));
-% mesh(X, Y, UX, 'FaceColor','flat'); view(2);
-% colorbar; colormap('jet');
-% subplot(1,3,3);
-% mesh(X, Y, UY, 'FaceColor','flat'); view(2);
-% colorbar; colormap('jet');
+%% plot
+UX = DISP(1:2:end); UY = DISP(2:2:end);
+UX_grid = reshape(UX, s+1, s+1);
+UY_grid = reshape(UY, s+1, s+1)';
+bulk_grid = reshape(eta_bulk, s+1, s+1)';
+BULK_grid = reshape(BULK, s, s)';
+h = figure();
+subplot(2,2,1);
+title('bulk (pt)')
+patch('Faces',t,'Vertices',p,'FaceVertexCData',eta_bulk,'FaceColor','flat','EdgeColor', 'none');
+colorbar();
+subplot(2,2,2);
+title('UY (pt)');
+patch('Faces',t,'Vertices',p,'FaceVertexCData',UY,'FaceColor','flat','EdgeColor', 'none');
+colorbar();
+subplot(2,2,3);
+title('bulk (grid)');
+[X, Y] = meshgrid(linspace(0,1,s), linspace(0,1,s));
+mesh(X, Y, BULK_grid, 'FaceColor','flat'); view(2);
+colorbar;
+subplot(2,2,4);
+title('UY (grid)');
+[X, Y] = meshgrid(linspace(0,1,s+1), linspace(0,1,s+1));
+mesh(X, Y, UY_grid, 'FaceColor','flat'); view(2);
+colorbar;
 % set(h, 'Position', [100,100,1200,300]);
 
 

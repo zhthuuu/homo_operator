@@ -1,0 +1,22 @@
+data:
+  name: 'Elliptic'
+  datapath: 'data/elliptic/test_N400_s64.mat'
+  offset: 0
+  n_sample: 400
+  nx: 64
+  sub: 1
+
+model:
+  layers: [64, 64, 64, 64]
+  modes1: [20, 20, 20]
+  modes2: [20, 20, 20]
+  fc_dim: 128
+  activation: gelu
+
+train:
+  batchsize: 20
+  epochs: 200
+
+others:
+  project: 'PINO-Elliptic-pretrain'
+  group: 'gelu-pino'
