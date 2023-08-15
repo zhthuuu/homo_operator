@@ -1,0 +1,25 @@
+data:
+  name: 'HyperElastic_Mesoscale'
+  datapath: '../data/mesoscale_grid/s128/test_N1000_s128_v0.mat'
+  offset: 0
+  n_sample: 1000
+  nx: 128
+  sub: 1
+
+prop:
+  bulk_mean: 1750
+  shear_mean: 328.125
+  bulk_height: 525
+  shear_height: 98.4375
+
+model:
+  layers: [64, 64, 64, 64]
+  modes1: [20, 20, 20]
+  modes2: [20, 20, 20]
+  fc_dim: 128
+  activation: gelu
+
+train:
+  save_dir: 'mesoscale/training_num/'
+  save_name: 'N4000.pt'
+

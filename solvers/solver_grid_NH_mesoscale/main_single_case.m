@@ -5,7 +5,7 @@ clear
 close all
 
 %% Load and plot the mesh
-load ../data/mesoscale_grid/input_s128.mat
+load ../../data/mesoscale_grid/input_s128.mat
 f = figure;
 subplot(1,2,1)
 title('bulk moduli');
@@ -59,9 +59,9 @@ DOFe = int32(DOFe); % if not convert, matlab will crash for c++ code
 % C2 = MATC2(:);
 % C3 = zeros(length(C1),1);
 % UNIAXIAL TENSION
-C1 = 1.5;
-C2 = 1.0;
-C3 = 0.0;
+C1 = 1.3;
+C2 = 1.2;
+C3 = 0.2;
 CauchyGreen = [C1, C3; 
                C3, C2];
 F = chol(CauchyGreen);
@@ -72,7 +72,7 @@ s, Ae, DOFe, ISPARSE, JSPARSE, KSPARSE);
 toc();
 disp(['weff = ', num2str(WEFF)]);
 
-%% plot
+% plot
 UX = DISP(1:2:end); UY = DISP(2:2:end);
 f = figure;
 subplot(1,2,1)
@@ -87,9 +87,10 @@ f.Position = [200 200 1100 400];
 
 %% plot
 UX = DISP(1:2:end); UY = DISP(2:2:end);
-UX_grid = flip(reshape(UX, s+1, s+1)');
-UY_grid = flip(reshape(UY, s+1, s+1)');
-bulk_grid = flip(reshape(BULK, s+1, s+1)');
+UX_grid = reshape(UX, s+1, s+1);
+UY_grid = reshape(UY, s+1, s+1)';
+bulk_grid = reshape(eta_bulk, s+1, s+1)';
+BULK_grid = reshape(BULK, s, s)';
 h = figure();
 subplot(2,2,1);
 title('bulk (pt)')
@@ -99,14 +100,17 @@ subplot(2,2,2);
 title('UY (pt)');
 patch('Faces',t,'Vertices',p,'FaceVertexCData',UY,'FaceColor','flat','EdgeColor', 'none');
 colorbar();
-subplot('bulk')
+subplot(2,2,3);
+title('bulk (grid)');
+[X, Y] = meshgrid(linspace(0,1,s), linspace(0,1,s));
+mesh(X, Y, BULK_grid, 'FaceColor','flat'); view(2);
+colorbar;
+subplot(2,2,4);
+title('UY (grid)');
 [X, Y] = meshgrid(linspace(0,1,s+1), linspace(0,1,s+1));
-mesh(X, Y, UX, 'FaceColor','flat'); view(2);
-colorbar; colormap('jet');
-subplot(1,3,3);
-mesh(X, Y, UY, 'FaceColor','flat'); view(2);
-colorbar; colormap('jet');
-set(h, 'Position', [100,100,1200,300]);
+mesh(X, Y, UY_grid, 'FaceColor','flat'); view(2);
+colorbar;
+% set(h, 'Position', [100,100,1200,300]);
 
 
 

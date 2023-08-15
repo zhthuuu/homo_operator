@@ -10,7 +10,6 @@ except ImportError:
 import torch
 from torch.utils.data import Dataset
 from .utils import convert_ic, torch2dgrid
-# from utils import convert_ic, torch2dgrid
 
 
 def online_loader(sampler, S, T, time_scale, batchsize=1):
@@ -127,13 +126,20 @@ class HyperElastic_mesoscale(Dataset):
                  datapath,
                  nx, sub,
                  offset=0,
-                 num=1):
+                 num=1, prop=None):
         self.S = int(nx // sub) 
         data = scipy.io.loadmat(datapath)
         a = data['a']
         u = data['u']
+        bulk_mean = prop['bulk_mean']
+        shear_mean = prop['shear_mean']
+        bulk_height = prop['bulk_height']
+        shear_height = prop['shear_height']
         self.a = torch.tensor(a[offset: offset + num, ::sub, ::sub], dtype=torch.float) # size (N x s x s x 2)
         self.u = torch.tensor(u[offset: offset + num, ::sub, ::sub], dtype=torch.float)
+        # normalization of a
+        self.a[...,0] = (self.a[...,0]-bulk_mean)/2/bulk_height+0.5
+        self.a[...,1] = (self.a[...,1]-shear_mean)/2/shear_height+0.5
         self.mesh = torch2dgrid(self.S, self.S)
 
     def __len__(self):
@@ -141,17 +147,12 @@ class HyperElastic_mesoscale(Dataset):
 
     def __getitem__(self, item):
         fa = self.a[item]
-        return torch.cat([fa, self.mesh], dim=2), self.u[item]
+        if len(fa.shape) == 3:
+            return torch.cat([fa, self.mesh], dim=2), self.u[item]
+        else:
+            mesh = self.mesh.unsqueeze(0).expand(fa.size(0), -1, -1, -1)
+            return torch.cat([fa, mesh], dim=3), self.u[item]
 
-# if __name__ == '__main__':
-#     path = '/Users/hz/Desktop/homo_operator/data/mesoscale_grid/train_N60_s128.mat'
-#     nx = 128
-#     sub = 1
-#     num = 60
-#     data = HyperElastic_mesoscale(path, nx, sub, num=60)
-#     print(len(data))
-#     a, u = data[1]
-#     print(a.shape, u.shape)
 
 
 

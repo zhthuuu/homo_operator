@@ -1,8 +1,8 @@
 % demo to generate isoptopic non-Gaussian random field on 2d manifold or 2d flat
 % surface. Here we use a flat square.
 clc; clear;
-addpath ../FEM_toolbox/model
-addpath ../FEM_toolbox/2d_grid
+addpath FEM_toolbox/model
+addpath FEM_toolbox/2d_grid
 seed = RandStream('mt19937ar', 'Seed', 1); RandStream.setGlobalStream(seed); %set seed
 
 %% preprocessing
@@ -17,12 +17,11 @@ normconst = normconst*l^(d-4); % alpha multiplied to the white noise vector
 delta = 0.3;
 rho = 0.9;
 
-
 %% material properties
-bulk_moduli = 1.75e4; % bulk modulus in MPa
-shear_moduli = 3281.25; % shear modulus in MPa
-bulk_moduli_height = bulk_moduli * 0.1;
-shear_moduli_height = shear_moduli*0.1;
+bulk_moduli = 1.75e3; % bulk modulus in MPa
+shear_moduli = 328.125; % shear modulus in MPa
+bulk_moduli_height = bulk_moduli * 0.3;
+shear_moduli_height = shear_moduli*0.3;
 
 %% generate grid mesh
 [p, t, FIXEDNODES] = generate_grid_mesh(s);
@@ -45,7 +44,7 @@ colorbar;
 
 %% generate dataset
 rng(41);
-N = 100;
+N = 5000;
 g1 = normrnd(mu,sigma,numNodes,N); 
 eta1 = transP * (R \ g1); 
 g2 = normrnd(mu,sigma,numNodes,N); 
@@ -53,6 +52,6 @@ eta2 = transP * (R \ g2);
 clear g1 g2
 eta_bulk = convert_beta_bulk(bulk_moduli_height, delta, eta1)+bulk_moduli;
 eta_shear = convert_beta_shear(shear_moduli_height, delta, eta1, eta2, rho)+shear_moduli;
-save ../../data/mesoscale_grid/input_N100_s128.mat eta_bulk eta_shear p t FIXEDNODES
+save ../../data/mesoscale_grid/input_N5000_s128.mat eta_bulk eta_shear p t FIXEDNODES
 
 

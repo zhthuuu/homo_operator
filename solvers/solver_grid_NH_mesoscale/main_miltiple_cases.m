@@ -5,7 +5,7 @@ clear
 close all
 
 %% Load and plot the mesh
-load ../data/mesoscale_grid/input_N100_s128.mat
+load ../../data/mesoscale_grid/input_N5000_s128.mat
 f = figure;
 subplot(1,2,1)
 title('bulk moduli');
@@ -58,38 +58,47 @@ end
 DOFe = int32(DOFe); % if not convert, matlab will crash for c++ code
 
 % deformation info
-C1 = 1.5;
-C2 = ones(length(C1),1);
-C3 = zeros(length(C1),1);
+C1 = 1.;
+C2 = 1.;
+C3 = 0.2;
 CauchyGreen = [C1, C3; 
                C3, C2];
 F = chol(CauchyGreen);
 H = F - eye(2);
 
 %% NONLINEAR FEM
-N = 100;
-DISP = zeros(N, s+1, s+1, 2);
+disp('Now running the solver...');
+N = 50;
+DISP = zeros(N, (s+1)*(s+1)*2);
 Weff = zeros(N, 1);
+BULK = BULK(:,1:N);
+SHEAR = SHEAR(:, 1:N);
+tic
 for id = 1:N
     BULK_id = BULK(:, id);
     SHEAR_id = SHEAR(:,id);
-    tic;
-    [Weff_id, DISP_id] = NL2DSOLVER(FIXEDNODES, p, BULK_id, SHEAR_id, NE, GDOF, ND, H, ...
+    [Weff(id), DISP(id,:)] = NL2DSOLVER(FIXEDNODES, p, BULK_id, SHEAR_id, NE, GDOF, ND, H, ...
     s, Ae, DOFe, ISPARSE, JSPARSE, KSPARSE);
-    toc;
-    UX = DISP_id(1:2:end); UY = DISP_id(2:2:end);
+end
+toc
+
+disp('Now transform DISP...');
+DISP_grid = zeros(N, s+1, s+1, 2);
+for id = 1:N
+    UX = DISP(id, 1:2:end); UY = DISP(id, 2:2:end);
     UX = reshape(UX, s+1, s+1)';
     UY = reshape(UY, s+1, s+1)';
-    Weff(id) = Weff_id;
-    DISP(id,:,:,1) = UX;
-    DISP(id,:,:,2) = UY;
-    if rem(id, 10) == 0
-        disp([num2str(id), ' cases finished.']);
-    end
+    DISP_grid(id,:,:,1) = UX;
+    DISP_grid(id,:,:,2) = UY;
 end
 
+
 %% save data
-save ../data/mesoscale_grid/output_N100_s128 DISP Weff BULK SHEAR
+disp('Now saving dataset...')
+save ../../data/mesoscale_grid/shear/output_N50_s128 DISP_grid Weff BULK SHEAR
+disp('Finished!')
+
+
 
 
 

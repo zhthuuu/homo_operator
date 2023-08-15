@@ -4,7 +4,7 @@ function eta_beta = convert_beta_bulk(height, delta, eta_norm)
     % delta = 0.57: free model parameter, delta = 2*std
     alpha = (1/delta^2-1)/2; % change of parameterization
     eta_beta = betainv(normcdf(eta_norm, 0, 1), alpha, alpha); 
-    eta_beta = height * eta_beta;
+    eta_beta = 2*height * eta_beta-height;
 
 end
 

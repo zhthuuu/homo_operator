@@ -169,7 +169,7 @@ def save_checkpoint(path, name, model, optimizer=None):
 
     torch.save({
         'model': model_state_dict,
-        # 'optim': optim_dict
+        'optim': optim_dict
     }, ckpt_dir + name)
     print('Checkpoint is saved at %s' % ckpt_dir + name)
 

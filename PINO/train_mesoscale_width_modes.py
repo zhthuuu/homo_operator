@@ -23,10 +23,15 @@ def train(args, config, E):
                         nx=data_config['nx'], sub=data_config['sub'],
                         offset=data_config['offset'], num=data_config['n_sample'], prop=config['prop'])
     dataloader = DataLoader(dataset, batch_size=config['train']['batchsize'])
-    model = FNN2d(modes1=config['model']['modes1'],
-                  modes2=config['model']['modes2'],
+    width = args.width
+    layers = [width]*4
+    modes = args.modes
+    modes1 = [modes] * 3
+    modes2 = [modes] * 3
+    model = FNN2d(modes1=modes1,
+                  modes2=modes2,
                   fc_dim=config['model']['fc_dim'],
-                  layers=config['model']['layers'],
+                  layers=layers,
                   in_dim = 4, out_dim = 2,
                   activation=config['model']['activation']).to(device)
     # Load from checkpoint
@@ -40,11 +45,14 @@ def train(args, config, E):
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer,
                                                      milestones=config['train']['milestones'],
                                                      gamma=config['train']['scheduler_gamma'])
+    save_name = str(width) + '_' + str(modes)
     train_2d_hyper_mesoscale(model, E, dataloader,
                             optimizer, scheduler,
                             config, rank=device, log=args.log,
                             project=config['others']['project'],
-                            group=config['others']['group'])
+                            group=config['others']['group'],
+                            save_name = save_name,
+                            use_tqdm=False)
 
 
 if __name__ == '__main__':
@@ -52,6 +60,8 @@ if __name__ == '__main__':
     parser = ArgumentParser(description='Basic paser')
     parser.add_argument('--config_path', type=str, help='Path to the configuration file')
     parser.add_argument('--log', action='store_true', help='Turn on the wandb')
+    parser.add_argument('--width', type=int, help='width of FNO')
+    parser.add_argument('--modes', type=int, help='Fourier modes of each Fourier layer')
     args = parser.parse_args()
 
     config_file = args.config_path
@@ -59,8 +69,8 @@ if __name__ == '__main__':
         config = yaml.load(stream, yaml.FullLoader)
 
     # deformation matrix, u_bc = E \dot x
-    C1 = 1.3
-    C2 = 1.2
+    C1 = 1.5
+    C2 = 1.
     C3 = 0.
     CauchyGreen = torch.tensor([[C1, C3],[C3, C2]], dtype=torch.float)
     F = torch.linalg.cholesky(CauchyGreen)

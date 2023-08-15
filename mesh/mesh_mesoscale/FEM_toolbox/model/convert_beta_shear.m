@@ -5,7 +5,7 @@ function eta_beta = convert_beta_shear(height, delta, eta_norm1, eta_norm2, rho)
     alpha = (1/delta^2-1)/2; % change of parameterization
     eta_norm = rho*eta_norm1 + sqrt(1-rho*rho)*eta_norm2;
     eta_beta = betainv(normcdf(eta_norm, 0, 1), alpha, alpha); % assuming that your Gaussian field is stored as G_CSF for the CSF
-    eta_beta = height * eta_beta;
+    eta_beta = 2*height * eta_beta - height;
 
 end
 

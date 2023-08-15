@@ -3,8 +3,10 @@ log
 .vscode
 __pycache__
 .idea
-figs
+figures
 checkpoints
+wandb
+loss_info
 .ipynb_checkpoints
 *.ipynb
 *.pt

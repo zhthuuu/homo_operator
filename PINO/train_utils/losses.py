@@ -66,17 +66,18 @@ def hyper_loss(u, a, E, prop):
     loss_f = torch.sqrt(mseloss(Weff, f))
     return loss_f
 
-def hyper_loss_NH_mesoscale(u, a, E):
+def hyper_loss_NH_mesoscale(u, a, E, prop):
     E = E.to(u.device)
     u = set_kubc(u, E) # set the kubc on u
-    Weff = calc_Weff_NH_mesoscale(u, a)
+    Weff = calc_Weff_NH_mesoscale(u, a, prop)
     # mean square error loss function
     mseloss = torch.nn.MSELoss()
     f = torch.zeros(Weff.shape, device=u.device)
     loss_f = torch.sqrt(mseloss(Weff, f))
+    # loss_f = mseloss(Weff, f)
     return loss_f
 
-def calc_Weff_NH_mesoscale(u, a):
+def calc_Weff_NH_mesoscale(u, a, prop):
     # area per grid
     Nele = a.size(1)
     Ae = 1/(Nele * Nele)
@@ -88,9 +89,16 @@ def calc_Weff_NH_mesoscale(u, a):
     # properties
     bulk_vec = a[:,:,:,0].reshape(-1, Nele*Nele)
     shear_vec = a[:,:,:,1].reshape(-1, Nele*Nele)
+    bulk_mean = prop['bulk_mean']
+    shear_mean = prop['shear_mean']
+    bulk_height = prop['bulk_height']
+    shear_height = prop['shear_height']
+    bulk_vec = 2*bulk_vec*bulk_height-bulk_height+bulk_mean
+    shear_vec = 2*shear_vec*shear_height-shear_height+shear_mean
     # weff, Neo-Hookean material
     Weff = shear_vec/2 * (C00 + C11 - 2) + \
            bulk_vec/2*(J-1)*(J-1) - shear_vec*torch.log(J)
+    # Weff = C11
     Weff = Ae * torch.sum(Weff, dim=1)
     return Weff
 

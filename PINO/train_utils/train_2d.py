@@ -188,21 +188,20 @@ def train_2d_hyper_mesoscale(model, E,
                             optimizer, scheduler,
                             config,
                             rank=0, log=False,
-                            project='PINO-2d-default',
+                            project='default',
                             group='default',
                             tags=['default'],
                             use_tqdm=True,
-                            profile=False):
+                            save_name = None):
     
-    if rank == 0 and wandb and log:
+    if wandb and log:
         run = wandb.init(project=project,
-                         entity='hyper-pino',
                          group=group,
                          config=config,
-                         tags=tags, reinit=True,
-                         settings=wandb.Settings(start_method="fork"))
+                         tags=tags, reinit=True)
 
     f_weight = config['train']['f_loss']
+    prop = config['prop']
     model.train()
     pbar = range(config['train']['epochs'])
     if use_tqdm: pbar = tqdm(pbar, dynamic_ncols=True, smoothing=0.1)
@@ -215,17 +214,17 @@ def train_2d_hyper_mesoscale(model, E,
             x, y = x.to(rank), y.to(rank)
             optimizer.zero_grad()
             y_pred = model(x)
-            f_loss = hyper_loss_NH_mesoscale(y_pred, x, E)
+            f_loss = hyper_loss_NH_mesoscale(y_pred, x, E, prop)
             loss = f_weight * f_loss
             loss.backward()
             optimizer.step()
-
             loss_dict['train_loss'] += loss.item() * x.shape[0]
             loss_dict['f_loss'] += f_loss.item() * x.shape[0]
 
         scheduler.step()
         train_loss_val = loss_dict['train_loss'] / len(train_loader.dataset)
         f_loss_val = loss_dict['f_loss'] / len(train_loader.dataset)
+        f_loss_val = f_loss_val
         loss_info.append(train_loss_val)
 
         if use_tqdm:
@@ -242,14 +241,16 @@ def train_2d_hyper_mesoscale(model, E,
                     'f loss': f_loss_val,
                 }
             )
+    if save_name == None: save_name = config['train']['save_name']
     save_checkpoint(config['train']['save_dir'],
-                    config['train']['save_name'],
-                    model, optimizer)
+                    save_name+'.pt',
+                    model)
     if wandb and log:
         run.finish()
     # save loss info
     loss_info = np.asarray(loss_info)
-    np.save('loss_info/hyperelastic_mesoscale/training.npy', loss_info)
+    loss_save_path = 'loss_info/' + config['train']['save_dir'] + save_name
+    np.save(loss_save_path, loss_info)
     print('Done!')
 
 

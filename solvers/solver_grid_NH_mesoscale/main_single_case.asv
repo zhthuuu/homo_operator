@@ -5,7 +5,7 @@ clear
 close all
 
 %% Load and plot the mesh
-load ../data/mesoscale_grid/input_s128.mat
+load ../../data/mesoscale_grid/input_s128.mat
 f = figure;
 subplot(1,2,1)
 title('bulk moduli');
@@ -59,9 +59,9 @@ DOFe = int32(DOFe); % if not convert, matlab will crash for c++ code
 % C2 = MATC2(:);
 % C3 = zeros(length(C1),1);
 % UNIAXIAL TENSION
-C1 = 1.5;
-C2 = 1.0;
-C3 = 0.0;
+C1 = 1.3;
+C2 = 1.2;
+C3 = 0.2;
 CauchyGreen = [C1, C3; 
                C3, C2];
 F = chol(CauchyGreen);

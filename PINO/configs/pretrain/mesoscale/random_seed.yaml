@@ -1,0 +1,37 @@
+data:
+  name: 'HyperElastic_Mesoscale'
+  datapath: '../data/mesoscale_grid/s128/train_N500_s128.mat'
+  offset: 0
+  n_sample: 500
+  nx: 128
+  sub: 1
+
+prop:
+  bulk_mean: 1750
+  shear_mean: 328.125
+  bulk_height: 525
+  shear_height: 98.4375
+
+model:
+  layers: [64, 64, 64, 64]
+  modes1: [20, 20, 20]
+  modes2: [20, 20, 20]
+  fc_dim: 128
+  activation: gelu
+
+train:
+  batchsize: 50
+  epochs: 200
+  milestones: [50,100, 150, 200]
+  base_lr: 0.001
+  scheduler_gamma: 0.5
+  f_loss: 1.0
+  xy_loss: 0
+  dbc_loss: 0
+  save_dir: 'mesoscale/biaxial'
+  save_name: 'seed_1008'
+  loss_save_name: 'seed_1008.npy'
+
+others:
+  project: 'HyperElastic-Mesoscale'
+  group: 'gelu-pino'
