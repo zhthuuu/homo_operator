@@ -1,6 +1,6 @@
 data:
   name: 'HyperElastic_Mesoscale'
-  datapath: '../data/mesoscale_grid/tension_shear/test_N1000_s128.mat'
+  datapath: '../data/mesoscale_grid/tension_shear/train_N1000_s128.mat'
   offset: 0
   n_sample: 1000
   nx: 128
@@ -20,6 +20,15 @@ model:
   activation: gelu
 
 train:
-  save_dir: 'mesoscale/different_F/'
+  batchsize: 128
+  epochs: 100
+  milestones: [50,100, 150, 200]
+  base_lr: 0.001
+  scheduler_gamma: 0.5
+  f_loss: 1.0
+  save_dir: 'mesoscale/different_F'
   save_name: 'tension_shear'
 
+others:
+  project: 'HyperElastic-Mesoscale'
+  group: 'gelu-pino'

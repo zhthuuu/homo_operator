@@ -147,17 +147,24 @@ def set_kubc(u, E):
     s = u.size(1) # u: batchsize x s x s x 2
     x = torch.linspace(0, 1, s+1, device=u.device).reshape([-1,1])
     y = torch.linspace(0, 1, s+1, device=u.device).reshape([-1,1])
-    y = y[:-1,:]
+    x0 = torch.zeros(1, s+1, device=u.device).reshape([-1,1])
+    y0 = torch.zeros(1, s, device=u.device).reshape([-1,1])
+    # expand u from s*s to (s+1)*(s+1)
+    right_u = torch.cat([y0, y0], dim=1)
+    right_u = right_u.reshape([s,1,2]).expand(batchsize, -1, -1, -1)
+    u = torch.cat([u, right_u], dim=2) # right
+    down_u = torch.cat([x0, x0], dim=1)
+    down_u = down_u.reshape([1,s+1,2]).expand(batchsize, -1, -1, -1)
+    u = torch.cat([u, down_u], dim=1) # down
+    # set KUBC
     left_u = torch.cat([E[0,1]*y, E[1,1]*y], dim=1)
     right_u = torch.cat([E[0,0]+E[0,1]*y, E[1,0]+E[1,1]*y], dim=1)
     up_u = torch.cat([E[0,0]*x+E[0,1], E[1,0]*x+E[1,1]], dim=1)
     down_u = torch.cat([E[0,0]*x, E[1,0]*x], dim=1)
     u[:,:,0,:] = left_u # left
-    right_u = right_u.reshape([s,1,2]).expand(batchsize, -1, -1, -1)
-    u = torch.cat([u, right_u], dim=2) # right
-    u[:,0,:,:] = up_u # up 
-    down_u = down_u.reshape([1,s+1,2]).expand(batchsize, -1, -1, -1)
-    u = torch.cat([u, down_u], dim=1) # down
+    u[:,:,-1,:] = right_u # right
+    u[:,0,:,:] = down_u # down
+    u[:,-1,:,:] = up_u # up
     return u # batchsize x s+1 x s+1 x2
 
 

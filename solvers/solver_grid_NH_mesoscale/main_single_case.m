@@ -9,7 +9,7 @@ load ../../data/mesoscale_grid/input_s128.mat
 f = figure;
 subplot(1,2,1)
 title('bulk moduli');
-patch('Faces',t,'Vertices',p,'FaceVertexCData',eta_bulk,'FaceColor','flat','EdgeColor', 'white');
+patch('Faces',t,'Vertices',p,'FaceVertexCData',eta_bulk,'FaceColor','flat','EdgeColor', 'none');
 colorbar;
 subplot(1,2,2)
 title('shear moduli');
@@ -87,7 +87,7 @@ f.Position = [200 200 1100 400];
 
 %% plot
 UX = DISP(1:2:end); UY = DISP(2:2:end);
-UX_grid = reshape(UX, s+1, s+1);
+UX_grid = reshape(UX, s+1, s+1)';
 UY_grid = reshape(UY, s+1, s+1)';
 bulk_grid = reshape(eta_bulk, s+1, s+1)';
 BULK_grid = reshape(BULK, s, s)';
@@ -97,7 +97,7 @@ title('bulk (pt)')
 patch('Faces',t,'Vertices',p,'FaceVertexCData',eta_bulk,'FaceColor','flat','EdgeColor', 'none');
 colorbar();
 subplot(2,2,2);
-title('UY (pt)');
+title('UX (pt)');
 patch('Faces',t,'Vertices',p,'FaceVertexCData',UY,'FaceColor','flat','EdgeColor', 'none');
 colorbar();
 subplot(2,2,3);
@@ -106,11 +106,32 @@ title('bulk (grid)');
 mesh(X, Y, BULK_grid, 'FaceColor','flat'); view(2);
 colorbar;
 subplot(2,2,4);
-title('UY (grid)');
+title('UX (grid)');
 [X, Y] = meshgrid(linspace(0,1,s+1), linspace(0,1,s+1));
 mesh(X, Y, UY_grid, 'FaceColor','flat'); view(2);
 colorbar;
 % set(h, 'Position', [100,100,1200,300]);
+
+
+%% test KUBC
+clc;
+% x_left = UX_grid(:,1);
+% x_right = UX_grid(:,end);
+% x_up = UX_grid(1,:);
+% x_down = UX_grid(end,:);
+% disp(x_left(1:10)');
+% disp(x_right(1:10)');
+% disp(x_up(1:10));
+% disp(x_down(1:10));
+% 
+% y_left = UY_grid(:,1);
+% y_right = UY_grid(:,end);
+% y_up = UY_grid(1,:);
+% y_down = UY_grid(end,:);
+% disp(y_left(1:10)');
+% disp(y_right(1:10)');
+% disp(y_up(1:10));
+% disp(y_down(1:10));
 
 
 

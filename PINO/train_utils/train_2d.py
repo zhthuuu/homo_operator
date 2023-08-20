@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import os
 from tqdm import tqdm
 from .utils import save_checkpoint
 from .losses import LpLoss, elliptic_loss, hyper_loss, hyper_loss_NH_mesoscale
@@ -31,14 +32,12 @@ def train_2d_elliptic(model,
                          tags=tags, reinit=True,
                          settings=wandb.Settings(start_method="fork"))
 
-    data_weight = config['train']['xy_loss']
     f_weight = config['train']['f_loss']
     model.train()
     myloss = LpLoss(size_average=True)
     pbar = range(config['train']['epochs'])
     if use_tqdm:
         pbar = tqdm(pbar, dynamic_ncols=True, smoothing=0.1)
-    mesh = train_loader.dataset.mesh
     for e in pbar:
         loss_dict = {'train_loss': 0.0,
                      'data_loss': 0.0,
@@ -241,12 +240,18 @@ def train_2d_hyper_mesoscale(model, E,
                     'f loss': f_loss_val,
                 }
             )
+    if wandb and log:
+        run.finish()
+
+    # save infomation
     if save_name == None: save_name = config['train']['save_name']
+    path_model = 'checkpoints/%s' % config['train']['save_dir']
+    path_loss = 'loss_info/%s' % config['train']['save_dir']
+    if not os.path.exists(path_model): os.makedirs(path_model)
+    if not os.path.exists(path_loss): os.makedirs(path_loss)
     save_checkpoint(config['train']['save_dir'],
                     save_name+'.pt',
                     model)
-    if wandb and log:
-        run.finish()
     # save loss info
     loss_info = np.asarray(loss_info)
     loss_save_path = 'loss_info/' + config['train']['save_dir'] + save_name
